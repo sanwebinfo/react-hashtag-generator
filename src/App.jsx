@@ -97,13 +97,13 @@ const App = () => {
   }, [notification])
 
   return (
-    <section className="section mt-6 mb-6" style={{ 
+    <section className="section mt-2 mb-4" style={{ 
       minHeight: '100vh'
     }}>
       <div className="container">
         <div className="columns is-centered">
           <div className="column is-two-thirds">
-            <h1 className="title has-text-centered mb-6 has-text-white">
+            <h1 className="title has-text-centered mb-6 has-text-white is-size-4">
               <span className="has-text-danger">#</span>
               HashTags
             </h1>
@@ -213,9 +213,9 @@ const App = () => {
                   ))}
                   
                   {hashtags.length === 0 && (
-                    <div className="has-text-grey-600 is-italic">
+                    <p className="has-text-grey-600">
                       Your generated hashtags will appear here...
-                    </div>
+                    </p>
                   )}
                 </div>
               </div>
