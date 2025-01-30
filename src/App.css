@@ -24,7 +24,7 @@ html, body {
 }
 body {
   font-family: "Geist Mono", monospace;
-	background-color: #1e293b;
+	background: linear-gradient(135deg, #8b6dec, #e9667c);
   line-height: 1.5;
   color: var(--dark);
   min-height: 100vh;
@@ -84,18 +84,11 @@ p {
 
 .notification {
   font-family: "Geist Mono", monospace;
-  display: flex !important;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  background-color: #3b82f6
 }
-
-.notification .delete {
-  position: static;
-  margin-left: auto;
+.has-button {
+  background: linear-gradient(130deg, #b93e94, #992bb4);
+  font-weight: 700;
 }
-
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

@@ -64,8 +64,8 @@ const App = () => {
     try {
       await navigator.clipboard.writeText(finalText)
       setNotification({ 
-        message: `Copied ${index === -1 ? 'all' : ''} hashtags`,
-        type: 'is-success'
+        message: `Copied ${index === -1 ? 'all' : ''} ✅`,
+        type: 'has-background-dark'
       })
       if (index !== -1) {
         setCopiedIndex(index)
@@ -91,7 +91,7 @@ const App = () => {
 
   useEffect(() => {
     if (notification) {
-      const timer = setTimeout(() => setNotification(null), 3000)
+      const timer = setTimeout(() => setNotification(null), 2100)
       return () => clearTimeout(timer)
     }
   }, [notification])
@@ -103,10 +103,6 @@ const App = () => {
       <div className="container">
         <div className="columns is-centered">
           <div className="column is-two-thirds">
-            <h1 className="title has-text-centered mb-6 has-text-white is-size-4">
-              <span className="has-text-danger">#</span>
-              HashTags
-            </h1>
 
             <div className="box" style={{ 
               borderRadius: '16px',
@@ -115,8 +111,8 @@ const App = () => {
               border: '1px solid rgba(0, 0, 0, 0.05)'
             }}>
               <div className="field">
-                <label className="label has-text-dark">
-                  ✍️ Enter Text (separate with spaces or commas)
+                <label className="label has-text-dark mb-5 mt-4">
+                  #️⃣ Enter Text (separate with spaces or commas)
                 </label>
                 <div className="control">
                   <textarea
@@ -223,8 +219,8 @@ const App = () => {
               <div className="field">
                 <div className="control">
                   <button
-                    className={`button mb-6 mt-5 ${hashtags.length > 0 ? 'is-info' : 'is-static'}`}
-                    onClick={() => copyToClipboard('🔥')}
+                    className={`button mb-5 mt-5 is-rounded ${hashtags.length > 0 ? 'has-button' : 'is-static'}`}
+                    onClick={() => copyToClipboard()}
                     disabled={hashtags.length === 0}
                     style={{
                       fontWeight: '700',
@@ -252,8 +248,9 @@ const App = () => {
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'space-between',
                   gap: '2.2rem',
-                  padding: '1.60rem 1.80rem',
+                  padding: '1.5rem 1.80rem',
                   width: 'auto',
                   maxWidth: 'calc(100% - 50px)',
                   backdropFilter: 'blur(4px)'
@@ -262,12 +259,6 @@ const App = () => {
                 <span className="has-text-weight-medium" style={{ flex: 1 }}>
                   {notification.message}
                 </span>
-                <button 
-                  className="delete is-small" 
-                  onClick={() => setNotification(null)}
-                  aria-label="Close notification"
-                  style={{ marginLeft: '1rem' }}
-                />
               </div>
             )}
           </div>
