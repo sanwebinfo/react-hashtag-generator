@@ -1,0 +1,128 @@
+:root {
+  --primary: #2563eb;
+  --blue: #193664;
+  --green: #073828;
+  --purple: #8b5cf6;
+  --orange: #aa7314;
+  --pink: #ec4899;
+  --dark: #1e293b;
+  --light: #f8fafc;
+}
+
+.has-background-primary { background-color: var(--primary) !important; }
+.has-background-blue { background-color: var(--blue) !important; }
+.has-background-green { background-color: var(--green) !important; }
+.has-background-purple { background-color: var(--purple) !important; }
+.has-background-orange { background-color: var(--orange) !important; }
+.has-background-pink { background-color: var(--pink) !important; }
+html, body {
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+	font-family: "Geist Mono", monospace;
+}
+body {
+  font-family: "Geist Mono", monospace;
+	background-color: #1e293b;
+  line-height: 1.5;
+  color: var(--dark);
+  min-height: 100vh;
+  justify-content: center;
+  align-items: center;
+  
+}
+.tag {
+  font-family: "Geist Mono", monospace;
+  animation: tagEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transform-origin: center;
+  color: #f8fafc;
+  font-weight: 700;
+}
+
+@keyframes tagEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+h1, h2, h3, h4, h5 {
+  font-family: "Geist Mono", monospace;
+}
+label {
+  font-family: "Geist Mono", monospace;
+}
+textarea {
+  font-family: "Geist Mono", monospace;
+}
+button {
+  font-family: "Geist Mono", monospace;
+}
+.textarea {
+  font-family: "Geist Mono", monospace;
+}
+.button {
+  font-family: "Geist Mono", monospace;
+}
+p {
+  font-family: "Geist Mono", monospace;
+}
+
+.textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1) !important;
+}
+
+.notification {
+  font-family: "Geist Mono", monospace;
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  background-color: #3b82f6
+}
+
+.notification .delete {
+  position: static;
+  margin-left: auto;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--info);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.delete:hover {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+}
+textarea[spellcheck="false"] {
+  -webkit-user-modify: read-write-plaintext-only;
+}
