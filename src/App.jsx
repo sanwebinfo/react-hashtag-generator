@@ -1,29 +1,46 @@
-import { useState, useEffect, useCallback } from 'react'
-import DOMPurify from 'dompurify'
-import { X, Copy, Check } from '@phosphor-icons/react'
-import './App.css'
-import 'bulma/css/bulma.min.css'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import DOMPurify from 'dompurify';
+import Fuse from 'fuse.js';
+import { X, Copy, Check } from '@phosphor-icons/react';
+import './App.css';
+import 'bulma/css/bulma.min.css';
 
 const MAX_HASHTAGS = 30;
-const COLOR_CLASSES = [
-  'has-background-blue',
-  'has-background-green',
-  'has-background-purple',
-  'has-background-orange',
-  'has-background-pink'
-]
+const COLOR_CLASSES = ['has-background-blue', 'has-background-green', 'has-background-purple', 'has-background-orange', 'has-background-pink'];
+const HASHTAG_API = '/hashtags.json';
 
 const App = () => {
-  const [inputText, setInputText] = useState(() => {
-    const saved = localStorage.getItem('hashtagInput')
-    return saved || ''
-  })
-  const [hashtags, setHashtags] = useState(() => {
-    const saved = localStorage.getItem('hashtags')
-    return saved ? JSON.parse(saved) : []
-  })
-  const [notification, setNotification] = useState(null)
-  const [copiedIndex, setCopiedIndex] = useState(-1)
+  const [inputText, setInputText] = useState(localStorage.getItem('hashtagInput') || '');
+  const [hashtags, setHashtags] = useState(() => JSON.parse(localStorage.getItem('hashtags') || '[]'));
+  const [notification, setNotification] = useState(null);
+  const [copiedIndex, setCopiedIndex] = useState(-1);
+  const [hashtagSuggestions, setHashtagSuggestions] = useState([]);
+  const [data, setData] = useState([]);
+  const dataRef = useRef([]);
+
+  useEffect(() => {
+    const fetchHashtags = async () => {
+      try {
+        const response = await fetch(HASHTAG_API);
+        const fetchedData = await response.json();
+        if (Array.isArray(fetchedData)) {
+          const formattedData = fetchedData.map(tag => ({ tag }));
+          dataRef.current = formattedData;
+          setData(formattedData);
+        }
+      } catch (error) {
+        console.error('Error fetching hashtags:', error);
+      }
+    };
+    fetchHashtags();
+  }, []);
+
+  const fuse = useMemo(() => {
+    if (data.length > 0) {
+      return new Fuse(data, { includeScore: true, threshold: 0.2, distance: 30, keys: ['tag'] });
+    }
+    return null;
+  }, [data]);
 
   const processHashtags = useCallback((text) => {
     return text
@@ -31,93 +48,96 @@ const App = () => {
       .map(part => DOMPurify.sanitize(part.trim()))
       .filter(tag => tag.length > 0)
       .slice(0, MAX_HASHTAGS)
-      .map(tag => `#${tag}`)
-  }, [])
+      .map(tag => `#${tag}`);
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('hashtagInput', inputText)
-    localStorage.setItem('hashtags', JSON.stringify(hashtags))
-  }, [inputText, hashtags])
+    localStorage.setItem('hashtagInput', inputText);
+    localStorage.setItem('hashtags', JSON.stringify(hashtags));
+  }, [inputText, hashtags]);
 
   useEffect(() => {
-    setHashtags(processHashtags(inputText))
-  }, [inputText, processHashtags])
+    setHashtags(processHashtags(inputText));
+  }, [inputText, processHashtags]);
 
   useEffect(() => {
-    const processed = processHashtags(inputText)
+    const processed = processHashtags(inputText);
     if (processed.length > MAX_HASHTAGS) {
-      setNotification({
-        message: `Instagram allows maximum ${MAX_HASHTAGS} hashtags!`,
-        type: 'is-warning'
-      })
+      setNotification({ message: `Instagram allows maximum ${MAX_HASHTAGS} hashtags!`, type: 'is-warning' });
     }
-    setHashtags(processed.slice(0, MAX_HASHTAGS))
-  }, [inputText, processHashtags])
+    setHashtags(processed.slice(0, MAX_HASHTAGS));
+  }, [inputText, processHashtags]);
+
+  const getLastTypedHashtag = (text) => {
+    const match = text.match(/#?(\w+)$/);
+    return match ? match[1] : '';
+  };
+
+  useEffect(() => {
+    if (!fuse) return setHashtagSuggestions([]);
+
+    const lastTypedHashtag = getLastTypedHashtag(inputText);
+    if (!lastTypedHashtag) return setHashtagSuggestions([]);
+
+    setHashtagSuggestions(fuse.search(lastTypedHashtag, { limit: 5 }).map(res => res.item.tag));
+  }, [inputText, fuse]);
 
   const copyToClipboard = async (text, index = -1) => {
-    const finalText = index === -1 ? hashtags.join(' ') : text
+    const finalText = index === -1 ? hashtags.join(' ') : text;
     if (!finalText) {
-      setNotification({ message: 'Nothing to copy', type: 'is-danger' })
-      return
+      setNotification({ message: 'Nothing to copy', type: 'is-danger' });
+      return;
     }
 
     try {
-      await navigator.clipboard.writeText(finalText)
-      setNotification({ 
-        message: `Copied ${index === -1 ? 'all' : ''} ✅`,
-        type: 'has-background-dark'
-      })
+      await navigator.clipboard.writeText(finalText);
+      setNotification({ message: `Copied ✅`, type: 'has-background-dark' });
       if (index !== -1) {
-        setCopiedIndex(index)
-        setTimeout(() => setCopiedIndex(-1), 1000)
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(-1), 1000);
       }
-    // eslint-disable-next-line no-unused-vars
-    } catch (err) {
-      setNotification({ message: 'Failed to copy', type: 'is-danger' })
+    } catch {
+      setNotification({ message: 'Failed to copy', type: 'is-danger' });
     }
-  }
+  };
 
   const deleteHashtag = (index) => {
-    const newHashtags = [...hashtags]
-    const deletedTag = newHashtags.splice(index, 1)[0].slice(1)
-    setHashtags(newHashtags)
-    
+    const newHashtags = [...hashtags];
+    const deletedTag = newHashtags.splice(index, 1)[0].slice(1);
+    setHashtags(newHashtags);
+
     const newInput = inputText
       .split(/[,\s]+/)
       .filter(tag => tag.trim() !== deletedTag)
-      .join(' ')
-    setInputText(newInput)
-  }
+      .join(' ');
+    setInputText(newInput);
+  };
+
+  const replaceLastTypedHashtag = (selectedTag) => {
+    const words = inputText.split(/\s+/);
+    words[words.length - 1] = `${selectedTag}`;
+    setInputText(words.join(' ') + ' ');
+  };
 
   useEffect(() => {
     if (notification) {
-      const timer = setTimeout(() => setNotification(null), 2100)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => setNotification(null), 2100);
+      return () => clearTimeout(timer);
     }
-  }, [notification])
+  }, [notification]);
 
   return (
-    <section className="section mt-2 mb-4" style={{ 
-      minHeight: '100vh'
-    }}>
+    <section className="section mt-2 mb-4" style={{ minHeight: '100vh' }}>
       <div className="container">
         <div className="columns is-centered">
           <div className="column is-two-thirds">
-
-            <div className="box" style={{ 
-              borderRadius: '16px',
-              background: '#ffffff',
-              boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08)',
-              border: '1px solid rgba(0, 0, 0, 0.05)'
-            }}>
+            <div className="box" style={{ borderRadius: '16px', background: '#ffffff', boxShadow: '0 4px 24px rgba(0, 0, 0, 0.08)', border: '1px solid rgba(0, 0, 0, 0.05)' }}>
               <div className="field">
-                <label className="label has-text-dark mb-5 mt-4">
-                  #️⃣ Enter Text (separate with spaces or commas)
-                </label>
+                <label className="label has-text-dark mb-5 mt-4">#️⃣ Enter Text (separate with spaces or commas)</label>
                 <div className="control">
                   <textarea
                     className="textarea is-warning"
-                    placeholder="Example: social media, marketing tips, digital creator"
+                    placeholder="Enter Text (separate with spaces or commas)"
                     value={inputText}
                     rows="10"
                     onChange={(e) => setInputText(e.target.value)}
@@ -139,7 +159,20 @@ const App = () => {
                 </div>
               </div>
 
-              <div className="field">
+              {hashtagSuggestions.length > 0 && (
+                <div className="field mt-6 mb-5">
+                  <label className="label has-text-dark">🔍 Suggested Hashtags</label>
+                  <div className="tags are-medium">
+                    {hashtagSuggestions.map((tag, index) => (
+                      <span key={index} className="tag is-info is-light" onClick={() => replaceLastTypedHashtag(tag)}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="field mt-6">
               <label className="label has-text-dark">
                  🏷️ Generated Hashtags ({hashtags.length}/{MAX_HASHTAGS})
                {hashtags.length >= MAX_HASHTAGS && (
@@ -207,7 +240,7 @@ const App = () => {
                       </button>
                     </div>
                   ))}
-                  
+
                   {hashtags.length === 0 && (
                     <p className="has-text-grey-600">
                       Your generated hashtags will appear here...
@@ -265,7 +298,7 @@ const App = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default App
+export default App;
