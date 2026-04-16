@@ -15,7 +15,7 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4
       dompurify:
-        specifier: ^3.3.3
+        specifier: ^3.4.0
         version: 3.4.0
       fuse.js:
         specifier: ^7.3.0
