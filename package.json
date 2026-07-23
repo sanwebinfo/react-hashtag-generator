@@ -13,7 +13,7 @@
     "@phosphor-icons/react": "^2.1.10",
     "bulma": "^1.0.4",
     "dompurify": "^3.4.12",
-    "fuse.js": "^7.4.2",
+    "fuse.js": "^7.5.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
